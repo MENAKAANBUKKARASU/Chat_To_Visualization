@@ -41,7 +41,6 @@ def suggest_visualizations(data):
         )
         return response["candidates"][0]["content"]
     except Exception as e:
-       # st.error(f"Error generating visualization suggestions: {e}")
         return suggest_visualizations_manually(data)
 
 # Manual fallback
@@ -69,7 +68,7 @@ def suggest_visualizations_manually(data):
 def create_visualization(data, prompt):
     code_snippet = ""
     try:
-        fig, ax = plt.subplots(figsize=(7,5))
+        fig, ax = plt.subplots(figsize=(7, 5))
         sns.set(style="whitegrid")
         if "scatter plot" in prompt.lower():
             x_col, y_col = data.select_dtypes(include=["number"]).columns[:2]
@@ -134,12 +133,13 @@ sns.lineplot(data=data, x='{datetime_col}', y='{numeric_col}')
 """
         else:
             st.error("Unable to match the visualization prompt.")
-            return None, None
+            return None
         st.pyplot(fig)
         return code_snippet
     except Exception as e:
         st.error(f"Error creating visualization: {e}")
         return None
+
 # Sidebar: Code display
 st.sidebar.title("📂 Code Display")
 st.sidebar.write("### Generated Code")
@@ -158,22 +158,16 @@ if uploaded_file:
     if data is not None:
         with st.expander("Click to view data preview"):
             st.dataframe(data)
-        suggestions = suggest_visualizations(data)
-        st.write("### Visualization Suggestions")
-        st.write(suggestions)
-        selected_prompt = st.selectbox("Choose a visualization prompt:", suggestions.split("\n"))
-        user_prompt = st.text_input("Or, enter a custom prompt:")
-        if selected_prompt:
-            st.write("### Generated Visualization")
-            generated_code = create_visualization(data, selected_prompt)
-            if generated_code:
-                generated_code_placeholder.code(generated_code, language="python")
-        elif user_prompt:
+        
+        # Allow user to enter custom query
+        user_prompt = st.text_input("Enter your visualization prompt:")
+
+        if user_prompt:
             st.write("### Generated Visualization")
             generated_code = create_visualization(data, user_prompt)
             if generated_code:
                 generated_code_placeholder.code(generated_code, language="python")
         else:
-            st.warning("Please select or enter a visualization prompt.")
+            st.warning("Please enter a custom visualization prompt.")
 else:
     st.info("Upload a file to start.")
