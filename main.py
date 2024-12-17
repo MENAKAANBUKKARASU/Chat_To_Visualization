@@ -8,7 +8,7 @@ import seaborn as sns
 st.set_page_config(page_title="AI-Powered Visualization Tool", page_icon="📊", layout="wide")
 
 # Configure Google Generative AI API key securely
-api_key = "AIzaSyDnfsg0VZivglg7vROEHZcyB5D176dpo7c"  # Replace with your API key
+api_key = "YOUR_API_KEY"  # Replace with your API key
 if api_key:
     genai.configure(api_key=api_key)
 else:
@@ -159,15 +159,22 @@ if uploaded_file:
         with st.expander("Click to view data preview"):
             st.dataframe(data)
         
-        # Allow user to enter custom query
-        user_prompt = st.text_input("Enter your visualization prompt:")
+        # Generate and display suggestions
+        suggestions = suggest_visualizations(data)
+        st.write("### Visualization Suggestions")
+        st.write(suggestions)
+        
+        selected_prompt = st.selectbox("Choose a visualization prompt:", suggestions.split("\n"))
+        user_prompt = st.text_input("Or, enter a custom prompt:")
 
-        if user_prompt:
+        # Generate visualization for selected or custom prompt
+        prompt_to_use = user_prompt if user_prompt else selected_prompt
+        if prompt_to_use:
             st.write("### Generated Visualization")
-            generated_code = create_visualization(data, user_prompt)
+            generated_code = create_visualization(data, prompt_to_use)
             if generated_code:
                 generated_code_placeholder.code(generated_code, language="python")
         else:
-            st.warning("Please enter a custom visualization prompt.")
+            st.warning("Please select or enter a visualization prompt.")
 else:
     st.info("Upload a file to start.")
